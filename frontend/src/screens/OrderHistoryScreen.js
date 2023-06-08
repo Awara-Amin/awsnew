@@ -50,12 +50,12 @@ export default function OrderHistoryScreen() {
     fetchData();
   }, [userInfo]);
   return (
-    <div>
+    <div className="container">
       <Helmet>
         <title>Order History</title>
       </Helmet>
 
-      <h1>Order History</h1>
+      <h1 className="mt-3">Order History</h1>
       {loading ? (
         <LoadingBox></LoadingBox>
       ) : error ? (

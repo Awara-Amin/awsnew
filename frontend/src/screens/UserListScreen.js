@@ -88,11 +88,11 @@ export default function UserListScreen() {
     }
   };
   return (
-    <div>
+    <div className="container">
       <Helmet>
         <title>Users</title>
       </Helmet>
-      <h1>Users</h1>
+      <h1 className="mt-3">Users</h1>
       {loadingDelete && <LoadingBox></LoadingBox>}
       {loading ? (
         <LoadingBox></LoadingBox>

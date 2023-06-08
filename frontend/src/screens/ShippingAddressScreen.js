@@ -56,7 +56,7 @@ export default function ShippingAddressScreen() {
     ctxDispatch({ type: 'SET_FULLBOX_OFF' });
   }, [ctxDispatch, fullBox]);
   return (
-    <div>
+    <div className="container mt-3">
       <Helmet>
         <title>Shipping Address</title>
       </Helmet>

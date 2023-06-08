@@ -1,0 +1,31 @@
+.card-bg-user {
+  background-color: #03c988;
+  border-color: #03c988;
+}
+.card-bg-order {
+  background-color: #ffc93c;
+  border-color: #ffc93c;
+}
+.card-bg-total {
+  background-color: #0081c9;
+  border-color: #0081c9;
+}
+.card-bg-purchase {
+  background-color: #cd0404;
+  border-color: #cd0404;
+}
+
+@media only screen and (max-width: 1024px) {
+  .card-bg-user {
+    margin-bottom: 10px;
+  }
+  .card-bg-order {
+    margin-bottom: 10px;
+  }
+  .card-bg-total {
+    margin-bottom: 10px;
+  }
+  .card-bg-purchase {
+    margin-bottom: 10px;
+  }
+}

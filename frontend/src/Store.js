@@ -19,6 +19,11 @@ const initialState = {
       ? JSON.parse(localStorage.getItem('cartItems'))
       : [],
   },
+  favorite: {
+    favoriteItems: localStorage.getItem('favoriteItems')
+      ? JSON.parse(localStorage.getItem('favoriteItems'))
+      : [],
+  },
 };
 function reducer(state, action) {
   switch (action.type) {
@@ -48,6 +53,30 @@ function reducer(state, action) {
     }
     case 'CART_CLEAR':
       return { ...state, cart: { ...state.cart, cartItems: [] } };
+    //add to favorite
+    case 'FAV_ADD_ITEM':
+      
+      const favItem = action.payload;
+      const favexistItem = state.favorite.favoriteItems.find(
+        (item) => item._id === favItem._id
+      );
+      const favoriteItems = favexistItem
+        ? state.favorite.favoriteItems.map((item) =>
+            item._id === favexistItem._id ? favItem : item
+          )
+        : [...state.favorite.favoriteItems, favItem];
+      localStorage.setItem('favoriteItems', JSON.stringify(favoriteItems));
+      return { ...state, favorite: { ...state.favorite, favoriteItems } };
+    case 'FAV_REMOVE_ITEM': {
+      const favoriteItems = state.favorite.favoriteItems.filter(
+        (item) => item._id !== action.payload._id
+      );
+      localStorage.setItem('favoriteItems', JSON.stringify(favoriteItems));
+      return { ...state, favorite: { ...state.favorite, favoriteItems } };
+    }
+    case 'FAV_CLEAR':
+      return { ...state, favorite: { ...state.favorite, favoriteItems: [] } };
+
     case 'USER_SIGNIN':
       return { ...state, userInfo: action.payload };
     case 'USER_SIGNOUT':

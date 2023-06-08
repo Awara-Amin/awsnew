@@ -1,10 +1,11 @@
 import axios from 'axios';
-import { useContext, useEffect, useReducer } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Form from 'react-bootstrap/Form';
 import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
 import Rating from '../components/Rating';
@@ -13,9 +14,26 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { getError } from '../utils';
 import { Store } from '../Store';
+import FloatingLabel from 'react-bootstrap/FloatingLabel';
+import { toast } from 'react-toastify';
+import TabProduct from '../components/TabProduct';
+import Paper from '@material-ui/core/Paper';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { green } from '@mui/material/colors';
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'REFRESH_PRODUCT':
+      return { ...state, product: action.payload };
+    case 'CREATE_REQUEST':
+      return { ...state, loadingCreateReview: true };
+    case 'CREATE_SUCCESS':
+      return { ...state, loadingCreateReview: false };
+    case 'CREATE_FAIL':
+      return { ...state, loadingCreateReview: false };
     case 'FETCH_REQUEST':
       return { ...state, loading: true };
     case 'FETCH_SUCCESS':
@@ -28,15 +46,22 @@ const reducer = (state, action) => {
 };
 
 function ProductScreen() {
+  let reviewsRef = useRef();
+  const [value, setValue] = useState(0);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [selectedImage, setSelectedImage] = useState('');
+
   const navigate = useNavigate();
   const params = useParams();
   console.log(params);
   const { slug } = params;
-  const [{ loading, error, product }, dispatch] = useReducer(reducer, {
-    product: [],
-    loading: true,
-    error: '',
-  });
+  const [{ loading, error, product, loadingCreateReview }, dispatch] =
+    useReducer(reducer, {
+      product: [],
+      loading: true,
+      error: '',
+    });
   useEffect(() => {
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
@@ -50,7 +75,7 @@ function ProductScreen() {
     fetchData();
   }, [slug]);
   const { state, dispatch: ctxDispatch } = useContext(Store);
-  const { cart } = state;
+  const { cart, userInfo } = state;
   const addToCartHandler = async () => {
     const existItem = cart.cartItems.find((x) => x._id === product._id);
     const quantity = existItem ? existItem.quantity + 1 : 1;
@@ -66,27 +91,79 @@ function ProductScreen() {
     navigate('/cart');
   };
 
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (!comment || !rating) {
+      toast.error('Please enter comment and rating');
+      return;
+    }
+    try {
+      const { data } = await axios.post(
+        `/api/products/${product._id}/reviews`,
+        { rating, comment, name: userInfo.name },
+        {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+
+      dispatch({
+        type: 'CREATE_SUCCESS',
+      });
+      toast.success('Review submitted successfully');
+      product.reviews.unshift(data.review);
+      product.numReviews = data.numReviews;
+      product.rating = data.rating;
+      dispatch({ type: 'REFRESH_PRODUCT', payload: product });
+      window.scrollTo({
+        behavior: 'smooth',
+        top: reviewsRef.current.offsetTop,
+      });
+    } catch (error) {
+      toast.error(getError(error));
+      dispatch({ type: 'CREATE_FAIL' });
+    }
+  };
+
   return loading ? (
     <LoadingBox />
   ) : error ? (
     <MessageBox variant="danger">{error}</MessageBox>
   ) : (
-    <div>
+    <div className=" container container-main">
+      <hr />
       <Row>
-        <Col md={6}>
+        <Col md={3}>
           <img
             className="img-large"
-            src={product.image}
+            src={selectedImage || product.image}
             alt={product.name}
           ></img>
+          {/* <ListGroup.Item> */}
+          <Row xs={1} md={4} className="g-1 mt-4">
+            {[product.image, ...product.images].map((x) => (
+              <Col key={x}>
+                <Card>
+                  <Button
+                    className="thumbnail"
+                    type="button"
+                    variant="light"
+                    onClick={() => setSelectedImage(x)}
+                  >
+                    <Card.Img variant="top" src={x} alt="product" />
+                  </Button>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          {/* </ListGroup.Item> */}
         </Col>
-        <Col md={3}>
+        <Col md={5}>
           <ListGroup variant="flush">
             <ListGroup.Item>
               <Helmet>
                 <title>{product.name}</title>
               </Helmet>
-              <h1>{product.name}</h1>
+              <h3>{product.name}</h3>
             </ListGroup.Item>
             <ListGroup.Item>
               <Rating
@@ -95,13 +172,28 @@ function ProductScreen() {
               ></Rating>
             </ListGroup.Item>
             <ListGroup.Item>Pirce : ${product.price}</ListGroup.Item>
+            {product.countInStock > 0 ? (
+              <ListGroup.Item>
+                <div className="d-flex">
+                  <h6><CheckCircleIcon style={{ fontSize:22,color: '#179519' }} /> AVAILABLE</h6>
+                </div>
+              </ListGroup.Item>
+            ) : (
+              <ListGroup.Item>
+                <div className="d-flex">
+                <DoNotDisturbAltIcon style={{fontSize:22, color: '#cc3537' }} />{' '}
+               UNAVAILABLE
+                </div>
+              </ListGroup.Item>
+              
+            )}
             <ListGroup.Item>
-              Description:
+              <h5>Description:</h5>
               <p>{product.description}</p>
             </ListGroup.Item>
           </ListGroup>
         </Col>
-        <Col md={3}>
+        <Col md={4}>
           <Card>
             <Card.Body>
               <ListGroup variant="flush">
@@ -138,6 +230,101 @@ function ProductScreen() {
           </Card>
         </Col>
       </Row>
+      <div className="tab-color">
+        <Paper square>
+          <Tabs
+            value={value}
+            textColor="#179519"
+            indicatorColor="secondary"
+            onChange={(event, newValue) => {
+              setValue(newValue);
+            }}
+          >
+            <Tab label="Product Details" active />
+            <Tab label="About the Author" />
+          </Tabs>
+          {value === 0 ? (
+            <p>{product.description}</p>
+          ) : (
+            <p>
+              New York Times bestselling author and illustrator Mo Willems
+              shares wit and wisdom from The Pigeon in this one-of-a-kind humor
+              book for adults. Discover important tips, thoughts, opinions,
+              quotes, complaints, and basic philosophical misunderstandings in
+              this profound collection of Pigeon-isms. This 80-page, gift-sized
+              collector's title features all-new original art along with big
+              (and little) Pigeon-y tidbits to ponder, such as:
+            </p>
+          )}
+        </Paper>
+      </div>
+      <div className="my-3">
+        <h2 ref={reviewsRef}>Reviews</h2>
+        <div className="mb-3">
+          {product.reviews.length === 0 && (
+            <MessageBox>There is no review</MessageBox>
+          )}
+        </div>
+        <ListGroup>
+          {product.reviews.map((review) => (
+            <ListGroup.Item key={review._id}>
+              <strong>{review.name}</strong>
+              <Rating rating={review.rating} caption=" "></Rating>
+              <p>{review.createdAt.substring(0, 10)}</p>
+              <p>{review.comment}</p>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+        <div className="my-3">
+          {userInfo ? (
+            <form onSubmit={submitHandler}>
+              <h2>Write a customer review</h2>
+              <Form.Group className="mb-3" controlId="rating">
+                <Form.Label>Rating</Form.Label>
+                <Form.Select
+                  aria-label="Rating"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="1">1- Poor</option>
+                  <option value="2">2- Fair</option>
+                  <option value="3">3- Good</option>
+                  <option value="4">4- Very good</option>
+                  <option value="5">5- Excelent</option>
+                </Form.Select>
+              </Form.Group>
+              <FloatingLabel
+                controlId="floatingTextarea"
+                label="Comments"
+                className="mb-3"
+              >
+                <Form.Control
+                  as="textarea"
+                  placeholder="Leave a comment here"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </FloatingLabel>
+
+              <div className="mb-3">
+                <Button disabled={loadingCreateReview} type="submit">
+                  Submit
+                </Button>
+                {loadingCreateReview && <LoadingBox></LoadingBox>}
+              </div>
+            </form>
+          ) : (
+            <MessageBox>
+              Please{' '}
+              <Link to={`/signin?redirect=/product/${product.slug}`}>
+                Sign In
+              </Link>{' '}
+              to write a review
+            </MessageBox>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

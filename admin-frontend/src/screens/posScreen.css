@@ -1,0 +1,37 @@
+.containerPOS {
+  display: flex;
+  white-space: nowrap;
+  overflow: auto;
+  /* flex-wrap: wrap; */
+  margin: 10px;
+  width: 100%;
+}
+
+.sides {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+.scrollable-div {
+  background-color: #f6f4f4;
+  height: 730px;
+  overflow: auto;
+  /* margin: 5px; */
+  text-align: justify;
+  /* padding: 5px; */
+}
+.pos-item {
+  cursor: pointer;
+  font-weight: bold;
+  /* width: 100%;
+  max-height: 100%; */
+}
+.pos-item:hover {
+  background: rgb(224, 232, 238);
+  color: white;
+}
+
+.pos-item img {
+  /* width: 100%;
+  max-height: 100px; */
+  object-fit: cover;
+}

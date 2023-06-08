@@ -1,17 +1,21 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomeScreen from './screens/HomeScreen';
 import ProductScreen from './screens/ProductScreen';
-import Navbar from 'react-bootstrap/Navbar';
-import Badge from 'react-bootstrap/Badge';
+// import Navbar from 'react-bootstrap/Navbar';
+//import Badge from 'react-bootstrap/Badge';
+// import Badge from '@mui/material/Badge';
+// import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+// import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+// import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useContext, useEffect, useState } from 'react';
 import { Store } from './Store';
 import CartScreen from './screens/CartScreen';
+import FavoriteScreen from './screens/FavoriteScreen';
 import SigninScreen from './screens/SigninScreen';
 import ShippingAddressScreen from './screens/ShippingAddressScreen';
 import SignupScreen from './screens/SignupScreen';
@@ -20,24 +24,41 @@ import PlaceOrderScreen from './screens/PlaceOrderScreen';
 import OrderScreen from './screens/OrderScreen';
 import OrderHistoryScreen from './screens/OrderHistoryScreen';
 import ProfileScreen from './screens/ProfileScreen';
-import Button from 'react-bootstrap/Button';
+// import Button from 'react-bootstrap/Button';
 import { getError } from './utils';
 import axios from 'axios';
-import SearchBox from './components/SearchBox';
+import NavbarHeader from './components/NavbarHeader';
+// import SearchBox from './components/SearchBox';
+
 import SearchScreen from './screens/SearchScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardScreen from './screens/DashboardScreen';
 import AdminRoute from './components/AdminRoute';
 import ProductListScreen from './screens/ProductListScreen';
 import ProductEditScreen from './screens/ProductEditScreen';
+import PosScreen from './screens/PosScreen';
 import OrderListScreen from './screens/OrderListScreen';
 import UserListScreen from './screens/UserListScreen';
 import UserEditScreen from './screens/UserEditScreen';
 import MapScreen from './screens/MapScreen';
+// import ViewListIcon from '@mui/icons-material/ViewList';
+import Footer from './components/Footer/Footer';
+
+import io from 'socket.io-client';
+export const socket = io.connect('http://localhost:3000');
+//const socket = io('http://localhost:3001');
+socket.on('reconnection', (data) => {
+  console.log(data.status);
+  toast(`You are online`);
+  // setIsConnected(false);
+});
+socket.on('disconnect', () => {
+  toast(`You are offline`);
+});
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
-  const { fullBox, cart, userInfo } = state;
+  const { fullBox, favorite, cart, userInfo } = state;
 
   const signoutHandler = () => {
     ctxDispatch({ type: 'USER_SIGNOUT' });
@@ -60,102 +81,39 @@ function App() {
     };
     fetchCategories();
   }, []);
+
   return (
     <BrowserRouter>
-      <div
+      {/* <div
         className={
           sidebarIsOpen
             ? fullBox
-              ? 'site-container active-cont d-flex flex-column full-box'
+              ? 'site-container active-cont d-flex flex-column full-box '
               : 'site-container active-cont d-flex flex-column'
             : fullBox
             ? 'site-container d-flex flex-column full-box'
             : 'site-container d-flex flex-column'
         }
-      >
+      > */}
+      <div className=" d-flex flex-column site-container">
         <ToastContainer position="bottom-center" limit={1} />
-        <header>
-          <Navbar className="navbar.navbar-light" expand="lg">
-            <Container>
-              <Button
-                variant="light"
-                onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
-              >
-                <i className="fas fa-bars"></i>
-              </Button>
+        <NavbarHeader />
 
-              <LinkContainer to="/">
-                <Navbar.Brand>Ecommerce</Navbar.Brand>
-              </LinkContainer>
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
-                <SearchBox />
-                <Nav className="me-auto  w-100  justify-content-end">
-                  <Link to="/cart" className="nav-link">
-                    Cart
-                    {cart.cartItems.length > 0 && (
-                      <Badge pill bg="danger">
-                        {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
-                      </Badge>
-                    )}
-                  </Link>
-                  {userInfo ? (
-                    <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
-                      <LinkContainer to="/profile">
-                        <NavDropdown.Item>User Profile</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/orderhistory">
-                        <NavDropdown.Item>Order History</NavDropdown.Item>
-                      </LinkContainer>
-                      <NavDropdown.Divider />
-                      <Link
-                        className="dropdown-item"
-                        to="#signout"
-                        onClick={signoutHandler}
-                      >
-                        Sign Out
-                      </Link>
-                    </NavDropdown>
-                  ) : (
-                    <Link className="nav-link" to="/signin">
-                      Sign In
-                    </Link>
-                  )}
-                  {userInfo && userInfo.isAdmin && (
-                    <NavDropdown title="Admin" id="admin-nav-dropdown">
-                      <LinkContainer to="/admin/dashboard">
-                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/admin/products">
-                        <NavDropdown.Item>Products</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/admin/orders">
-                        <NavDropdown.Item>Orders</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/admin/users">
-                        <NavDropdown.Item>Users</NavDropdown.Item>
-                      </LinkContainer>
-                    </NavDropdown>
-                  )}
-                </Nav>
-              </Navbar.Collapse>
-            </Container>
-          </Navbar>
-        </header>
         <div
           className={
             sidebarIsOpen
-              ? 'active-nav side-navbar d-flex justify-content-between flex-wrap flex-column'
+              ? 'active-nav side-navbar bg-dark d-flex justify-content-between flex-wrap flex-column'
               : 'side-navbar d-flex justify-content-between flex-wrap flex-column'
           }
         >
-          <Nav className="flex-column text-black w-100 p-2">
+          <Nav className="flex-column text-white w-100 p-2">
             <Nav.Item>
               <strong>Categories</strong>
             </Nav.Item>
             {categories.map((category) => (
               <Nav.Item key={category}>
                 <LinkContainer
+                  className="flex-column text-white w-100 p-2"
                   to={`/search?category=${category}`}
                   onClick={() => setSidebarIsOpen(false)}
                 >
@@ -165,15 +123,18 @@ function App() {
             ))}
           </Nav>
         </div>
+
         <main>
-          <Container className="mt-3">
+          <Container fluid="true">
             <Routes>
               <Route path="/product/:slug" element={<ProductScreen />} />
               <Route path="/cart" element={<CartScreen />} />
+              <Route path="/favorite" element={<FavoriteScreen />} />
               <Route path="/search" element={<SearchScreen />} />
               <Route path="/signin" element={<SigninScreen />} />
               <Route path="/signup" element={<SignupScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />
+
               <Route
                 path="/profile"
                 element={
@@ -199,6 +160,7 @@ function App() {
                   </ProtectedRoute>
                 }
               ></Route>
+
               <Route
                 path="/orderhistory"
                 element={
@@ -254,6 +216,14 @@ function App() {
                 }
               ></Route>
               <Route
+                path="/admin/pos"
+                element={
+                  <AdminRoute>
+                    <PosScreen />
+                  </AdminRoute>
+                }
+              ></Route>
+              <Route
                 path="/admin/user/:id"
                 element={
                   <AdminRoute>
@@ -261,14 +231,15 @@ function App() {
                   </AdminRoute>
                 }
               ></Route>
-              <Route path="/" element={<HomeScreen />} />
+              <Route path="/" element={<HomeScreen />} exact />
             </Routes>
           </Container>
+          {/* <Routes>
+            <Route path="/" element={<HomeScreen />} exact />
+          </Routes> */}
         </main>
         <footer className="footer footer-light">
-          <div className="container text-center text-md-left">
-            © 2022 Copyright: All rights reserved
-          </div>
+          <Footer />
         </footer>
       </div>
     </BrowserRouter>

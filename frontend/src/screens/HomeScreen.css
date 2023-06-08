@@ -1,0 +1,35 @@
+.bgabout-image {
+  background-image: url('/public/images/banner1.jpg');
+  min-height: 30vh;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+   margin-top: 40px;
+   margin-bottom: 40px;
+}
+.agency-right {
+    color: black;
+    background-color: hsla(0,0%,100%,.6);;
+    margin-top: 30px;
+    border-radius: 40px 0;
+    margin-bottom: 30px;
+    padding: 20px;
+  }
+  .text-justify {
+    text-align: justify;
+    text-justify: inter-word;
+    color: rgb(36, 140, 36);
+    text-decoration-color: blue;
+  }
+  
+
+  @media only screen and (max-width: 600px) {
+    
+    .agency-right{
+        margin-top: 10px;
+      margin-bottom: 10px;
+      height: 90%;
+    }
+  }

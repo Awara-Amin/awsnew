@@ -10,7 +10,7 @@ import Rating from '../components/Rating';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import Button from 'react-bootstrap/Button';
-import Product from '../components/Product';
+import Product from '../components/ProductCart/Product';
 import LinkContainer from 'react-router-bootstrap/LinkContainer';
 
 const reducer = (state, action) => {
@@ -128,13 +128,13 @@ export default function SearchScreen() {
     return `/search?category=${filterCategory}&query=${filterQuery}&price=${filterPrice}&rating=${filterRating}&order=${sortOrder}&page=${filterPage}`;
   };
   return (
-    <div>
+    <div className="container top-screen">
       <Helmet>
         <title>Search Products</title>
       </Helmet>
       <Row>
-        <Col md={3}>
-          <h3>Department</h3>
+        <Col md={2}>
+          <h5 className="mt-3">Department</h5>
           <div>
             <ul>
               <li>
@@ -158,7 +158,7 @@ export default function SearchScreen() {
             </ul>
           </div>
           <div>
-            <h3>Price</h3>
+            <h5>Price</h5>
             <ul>
               <li>
                 <Link
@@ -181,7 +181,7 @@ export default function SearchScreen() {
             </ul>
           </div>
           <div>
-            <h3>Avg. Customer Review</h3>
+            <h5>Reviews</h5>
             <ul>
               {ratings.map((r) => (
                 <li key={r.name}>
@@ -204,7 +204,7 @@ export default function SearchScreen() {
             </ul>
           </div>
         </Col>
-        <Col md={9}>
+        <Col md={10}>
           {loading ? (
             <LoadingBox></LoadingBox>
           ) : error ? (
@@ -251,15 +251,15 @@ export default function SearchScreen() {
                 <MessageBox>No Product Found</MessageBox>
               )}
 
-              <Row>
+              <Row >
                 {products.map((product) => (
-                  <Col sm={6} lg={4} className="mb-3" key={product._id}>
+                  <Col sm={6} md={4} lg={2} className="mb-0 p-1"  key={product._id}>
                     <Product product={product}></Product>
                   </Col>
                 ))}
               </Row>
 
-              <div className="text-center">
+              <div className="page-index text-center">
                 {[...Array(pages).keys()].map((x) => (
                   <LinkContainer
                     key={x + 1}

@@ -36,11 +36,11 @@ export default function CartScreen() {
     navigate('/signin?redirect=/shipping');
   };
   return (
-    <div>
+    <div className="container top-screen">
       <Helmet>
         <title>Shopping Cart</title>
       </Helmet>
-      <h1>Shopping Cart</h1>
+      <h3 className="mt-3">Shopping Cart</h3>
       <Row>
         <Col md={8}>
           {cartItems.length === 0 ? (

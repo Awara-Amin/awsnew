@@ -104,7 +104,7 @@ export default function ProductListScreen() {
             headers: { Authorization: `Bearer ${userInfo.token}` },
           }
         );
-        toast.success('product created successfully');
+        //toast.success('product created successfully');
         dispatch({ type: 'CREATE_SUCCESS' });
         navigate(`/admin/product/${data.product._id}`);
       } catch (err) {
@@ -133,20 +133,20 @@ export default function ProductListScreen() {
     }
   };
   return (
-    <div>
+    <div className="container">
       <Row>
         <Col>
-          <h1>Products</h1>
+          <h4 className="mt-3">Products</h4>
         </Col>
-        <Col className="col text-end">
-          <div>
-            <Button type="button" onClick={createHandler}>
-              Create Product
+        <Col className="text-end">
+          <div className="mt-3">
+            <Button type="button" className='btn-add' onClick={createHandler}>
+              Add Product
             </Button>
           </div>
         </Col>
       </Row>
-
+<hr/>
       {loadingCreate && <LoadingBox></LoadingBox>}
       {loadingDelete && <LoadingBox></LoadingBox>}
       {loading ? (
